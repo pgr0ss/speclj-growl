@@ -1,7 +1,8 @@
 (ns speclj.report.growl
   (:use
     [speclj.exec :only (pass? fail? pending?)]
-    [speclj.reporting :only ()]
+    [speclj.report.documentation :only (new-documentation-reporter)]
+    [speclj.reporting :only (report-fail report-description report-message report-pass report-pending)]
     [speclj.report.progress :only (print-summary)]
     [clj-growl.core :only (make-growler)])
   (:import
@@ -33,11 +34,16 @@
 
 (deftype GrowlReporter [passes fails results]
     Reporter
-    (report-message [this message])
-    (report-description [this description])
-    (report-pass [this result])
-    (report-pending [this result])
-    (report-fail [this result])
+    (report-message [this message]
+      (report-message (new-documentation-reporter) message))
+    (report-description [this description]
+      (report-description (new-documentation-reporter) description))
+    (report-pass [this result]
+      (report-pass (new-documentation-reporter) result))
+    (report-pending [this result]
+      (report-pending (new-documentation-reporter) result))
+    (report-fail [this result]
+      (report-fail (new-documentation-reporter) result))
     (report-runs [this results]
       (print-summary results)
       (growl "Message" "Specs" (growl-message results))))
