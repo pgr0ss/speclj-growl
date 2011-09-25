@@ -2,7 +2,7 @@
   (:use
     [speclj.exec :only (pass? fail? pending?)]
     [speclj.report.documentation :only (new-documentation-reporter)]
-    [speclj.reporting :only (report-fail report-description report-message report-pass report-pending)]
+    [speclj.reporting :only (report-fail report-description report-message report-pass report-pending report-runs)]
     [speclj.report.progress :only (print-summary)]
     [clj-growl.core :only (make-growler)])
   (:import
@@ -29,8 +29,13 @@
           always-on-counts)))))
 
 (defn growl-message [results]
-  (let [result-map (categorize results)]
-    (describe-counts-for result-map)))
+  (let [result-map (categorize results)
+        tally (apply hash-map (interleave (keys result-map) (map count (vals result-map))))
+        title (if (zero? (:fail tally)) "Success" "Failure")]
+    ["Message" title (describe-counts-for result-map)]))
+
+(defn tally [result-map]
+  (apply hash-map (interleave (keys result-map) (map count (vals result-map)))))
 
 (deftype GrowlReporter [passes fails results]
     Reporter
@@ -45,8 +50,8 @@
     (report-fail [this result]
       (report-fail (new-documentation-reporter) result))
     (report-runs [this results]
-      (print-summary results)
-      (growl "Message" "Specs" (growl-message results))))
+      (report-runs (new-documentation-reporter) results)
+      (apply growl (growl-message results))))
 
 (defn new-growl-reporter []
     (GrowlReporter. (atom 0) (atom 0) (atom nil)))

@@ -57,16 +57,16 @@
         (should= expected-output (with-out-str (report-fail @reporter result))))))
 
   (describe "report-runs"
-    (it "prints summary to the terminal"
-        (binding [growl @fake-growl]
-          (let [output (with-out-str (report-runs @reporter []))]
-            (should (.contains output "0 examples, 0 failures")))))
+    (it "prints the same messages as DocumentationReporter to the terminal"
+      (binding [growl @fake-growl]
+        (let [expected-output (with-out-str (report-runs @documentation-reporter []))]
+          (should= expected-output (with-out-str (report-runs @reporter []))))))
 
     (it "growls summary information for no test runs"
         (binding [growl @fake-growl]
           (let [output (with-out-str (report-runs @reporter []))]
             (should= "Message" @@notification)
-            (should= "Specs" @@title)
+            (should= "Success" @@title)
             (should= "0 examples, 0 failures" @@message))))
 
     (it "growls a successful run"
@@ -76,5 +76,17 @@
                 results [result1 result2]
                 output (with-out-str (report-runs @reporter results))]
             (should= "Message" @@notification)
-            (should= "Specs" @@title)
-            (should= "2 examples, 0 failures" @@message))))))
+            (should= "Success" @@title)
+            (should= "2 examples, 0 failures" @@message))))
+
+    (it "growls an unsuccessful run"
+        (binding [growl @fake-growl]
+          (let [result1 (pass-result nil 0.1)
+                description (new-description "Desc" *ns*)
+                characteristic (new-characteristic "says fail" description "fail")
+                result2 (fail-result characteristic 2 (SpecFailure. "blah"))
+                results [result1 result2]
+                output (with-out-str (report-runs @reporter results))]
+            (should= "Message" @@notification)
+            (should= "Failure" @@title)
+            (should= "2 examples, 1 failures" @@message))))))
