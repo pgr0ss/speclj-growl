@@ -67,7 +67,7 @@
           (let [output (with-out-str (report-runs @reporter []))]
             (should= "Message" @@notification)
             (should= "Success" @@title)
-            (should= "0 examples, 0 failures" @@message))))
+            (should= "Finished in 0.00000 seconds\n0 examples, 0 failures" @@message))))
 
     (it "growls a successful run"
         (binding [growl @fake-growl]
@@ -77,7 +77,7 @@
                 output (with-out-str (report-runs @reporter results))]
             (should= "Message" @@notification)
             (should= "Success" @@title)
-            (should= "2 examples, 0 failures" @@message))))
+            (should= "Finished in 0.12000 seconds\n2 examples, 0 failures" @@message))))
 
     (it "growls an unsuccessful run"
         (binding [growl @fake-growl]
@@ -89,4 +89,4 @@
                 output (with-out-str (report-runs @reporter results))]
             (should= "Message" @@notification)
             (should= "Failure" @@title)
-            (should= "2 examples, 1 failures" @@message))))))
+            (should= "Finished in 2.10000 seconds\n2 examples, 1 failures" @@message))))))

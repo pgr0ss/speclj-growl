@@ -2,8 +2,9 @@
   (:use
     [speclj.exec :only (pass? fail? pending?)]
     [speclj.report.documentation :only (new-documentation-reporter)]
-    [speclj.reporting :only (report-fail report-description report-message report-pass report-pending report-runs)]
+    [speclj.reporting :only (report-fail report-description report-message report-pass report-pending report-runs tally-time)]
     [speclj.report.progress :only (print-summary)]
+    [speclj.util :only (seconds-format)]
     [clj-growl.core :only (make-growler)])
   (:import
     [speclj.reporting Reporter]))
@@ -31,8 +32,10 @@
 (defn growl-message [results]
   (let [result-map (categorize results)
         tally (apply hash-map (interleave (keys result-map) (map count (vals result-map))))
-        title (if (zero? (:fail tally)) "Success" "Failure")]
-    ["Message" title (describe-counts-for result-map)]))
+        title (if (zero? (:fail tally)) "Success" "Failure")
+        duration (.format seconds-format (tally-time results))
+        counts (describe-counts-for result-map)]
+    ["Message" title (format "Finished in %s seconds\n%s" duration counts)]))
 
 (defn tally [result-map]
   (apply hash-map (interleave (keys result-map) (map count (vals result-map)))))
