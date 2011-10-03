@@ -2,16 +2,14 @@
   (:use
     [speclj.core]
     [speclj.components :only (new-characteristic new-description)]
-    [speclj.results :only (pass-result fail-result pending-result)]
+    [speclj.results :only (pass-result fail-result)]
     [speclj.report.growl]
-    [speclj.report.documentation :only (new-documentation-reporter)]
-    [speclj.reporting :only (report-description report-fail report-message report-pass report-pending report-runs)])
+    [speclj.reporting :only (report-runs)])
   (:import
     [speclj SpecFailure SpecPending]))
 
 
 (describe "Growl Reporter"
-  (with documentation-reporter (new-documentation-reporter))
   (with reporter (new-growl-reporter))
   (with notification (atom nil))
   (with title (atom nil))

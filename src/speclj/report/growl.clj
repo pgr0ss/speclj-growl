@@ -1,8 +1,8 @@
 (ns speclj.report.growl
   (:use
-    [speclj.results :only (pass? fail? pending? categorize)]
-    [speclj.reporting :only (report-fail report-description report-message report-pass report-pending report-runs tally-time)]
-    [speclj.report.progress :only (print-summary describe-counts-for)]
+    [speclj.results :only (categorize)]
+    [speclj.reporting :only (tally-time)]
+    [speclj.report.progress :only (describe-counts-for)]
     [speclj.util :only (seconds-format)]
     [clj-growl.core :only (make-growler)])
   (:import
