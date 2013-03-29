@@ -11,43 +11,38 @@
 
 (describe "Growl Reporter"
   (with reporter (new-growl-reporter))
-  (with notification (atom nil))
-  (with title (atom nil))
+  (with result (atom nil))
   (with message (atom nil))
-  (with fake-growl (fn [_notification _title _message]
-                     (reset! @notification _notification)
-                     (reset! @title _title)
+  (with fake-growl (fn [_result _message]
+                     (reset! @result _result)
                      (reset! @message _message)))
 
   (describe "report-runs"
 
     (it "growls summary information for no test runs"
-      (binding [growl @fake-growl]
+      (with-redefs [growl @fake-growl]
         (let [output (with-out-str (report-runs @reporter []))]
-          (should= "Message" @@notification)
-          (should= "Success" @@title)
-          (should= "Finished in 0.00000 seconds\n0 examples, 0 failures" @@message))))
+          (should= :pass @@result)
+          (should= "0 examples, 0 failures\nTook 0.00000 seconds" @@message))))
 
     (it "growls a successful run"
-      (binding [growl @fake-growl]
+      (with-redefs [growl @fake-growl]
         (let [result1 (pass-result nil 0.1)
               result2 (pass-result nil 0.02)
               results [result1 result2]
               output (with-out-str (report-runs @reporter results))]
-          (should= "Message" @@notification)
-          (should= "Success" @@title)
-          (should= "Finished in 0.12000 seconds\n2 examples, 0 failures" @@message))))
+          (should= :pass @@result)
+          (should= "2 examples, 0 failures\nTook 0.12000 seconds" @@message))))
 
     (it "growls an unsuccessful run"
-      (binding [growl @fake-growl]
+      (with-redefs [growl @fake-growl]
         (let [result1 (pass-result nil 0.1)
               description (new-description "Desc" *ns*)
               characteristic (new-characteristic "says fail" description "fail")
               result2 (fail-result characteristic 2 (SpecFailure. "blah"))
               results [result1 result2]
               output (with-out-str (report-runs @reporter results))]
-          (should= "Message" @@notification)
-          (should= "Failure" @@title)
-          (should= "Finished in 2.10000 seconds\n2 examples, 1 failures" @@message))))))
+          (should= :fail @@result)
+          (should= "2 examples, 1 failures\nTook 2.10000 seconds" @@message))))))
 
 (run-specs)

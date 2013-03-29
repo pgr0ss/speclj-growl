@@ -1,22 +1,38 @@
 (ns speclj.report.growl
-  (:use
-    [speclj.results :only (categorize)]
-    [speclj.reporting :only (tally-time)]
-    [speclj.report.progress :only (describe-counts-for)]
-    [speclj.util :only (seconds-format)]
-    [clj-growl.core :only (make-growler)])
-  (:import
-    [speclj.reporting Reporter]))
+  (:require [speclj.results :refer [categorize]]
+            [speclj.reporting :refer [tally-time]]
+            [speclj.report.progress :refer [describe-counts-for]]
+            [speclj.util :refer [seconds-format]]
+            [clojure.java.io :refer [input-stream resource as-url]]
+            [gntp])
+  (:import [speclj.reporting Reporter]))
 
-(def growl (make-growler "" "speclj" ["Message" true]))
+(def ^:private resource-stream (comp input-stream resource))
+
+(defn- settings [type]
+  (case type
+    :pass {:name "Success" :icon (resource-stream "pass.png")}
+    :fail {:name "Failure" :icon (resource-stream "fail.png")}))
+
+(def ^:private notifiers
+  ((gntp/make-growler "Speclj")
+    :pass (settings :pass) :fail (settings :fail)))
+
+(defn growl
+  "Trigger notification of the appropriate type"
+  [result message]
+  (when notifiers
+    (let [params (settings result)]
+      ((result notifiers)
+         (params :name) :text message :icon (params :icon)))))
 
 (defn growl-message [results]
   (let [result-map (categorize results)
-        tally (apply hash-map (interleave (keys result-map) (map count (vals result-map))))
-        title (if (zero? (:fail tally)) "Success" "Failure")
-        duration (.format seconds-format (tally-time results))
-        counts (describe-counts-for result-map)]
-    ["Message" title (format "Finished in %s seconds\n%s" duration counts)]))
+        result     (if (= 0 (count (:fail result-map))) :pass :fail)
+        seconds    (tally-time results)
+        outcome    (describe-counts-for result-map)
+        message    (format "%s\nTook %.05f seconds" outcome seconds)]
+    (growl result message)))
 
 (deftype GrowlReporter []
     Reporter
@@ -25,8 +41,7 @@
     (report-pass [this result])
     (report-pending [this result])
     (report-fail [this result])
-    (report-runs [this results]
-      (apply growl (growl-message results))))
+    (report-runs [this results] (growl-message results)))
 
 (defn new-growl-reporter []
     (GrowlReporter.))
