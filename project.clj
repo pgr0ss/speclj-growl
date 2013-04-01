@@ -1,6 +1,10 @@
-(defproject speclj-growl "1.0.1"
+(defproject speclj-growl "2.0.0"
   :description "Growl reporter for the speclj testing framework"
-  :dependencies [[org.clojure/clojure "1.2.0"]
-                 [clj-growl "0.2.1"]]
-  :dev-dependencies [[speclj "1.5.3"]]
-  :test-path "spec/")
+  :dependencies [[org.clojure/clojure "1.5.0"]
+                 [gntp "0.6.0"]]
+  :resource-paths ["resources"]
+  :profiles {
+    :dev {
+      :plugins [[speclj "2.5.0"]]
+      :dependencies [[speclj "2.5.0"]]
+      :test-paths ["spec/"]}})
