@@ -4,7 +4,7 @@
     [speclj.components :only (new-characteristic new-description)]
     [speclj.results :only (pass-result fail-result)]
     [speclj.report.growl]
-    [speclj.reporting :only (report-runs)])
+    [speclj.reporting :only (report-runs report-error)])
   (:import
     [speclj SpecFailure SpecPending]))
 
@@ -43,6 +43,13 @@
               results [result1 result2]
               output (with-out-str (report-runs @reporter results))]
           (should= :fail @@result)
-          (should= "2 examples, 1 failures\nTook 2.10000 seconds" @@message))))))
+          (should= "2 examples, 1 failures\nTook 2.10000 seconds" @@message))))
+
+    (it "growls compilation errors"
+      (with-redefs [growl @fake-growl]
+        (let [ex (Exception. "Failed to compile")
+              output (with-out-str (report-error @reporter ex))]
+          (should= :error @@result)
+          (should= "Exception: Failed to compile" @@message))))))
 
 (run-specs)

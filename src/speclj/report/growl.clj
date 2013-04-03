@@ -12,11 +12,14 @@
 (defn- settings [type]
   (case type
     :pass {:name "Success" :icon (resource-stream "pass.png")}
-    :fail {:name "Failure" :icon (resource-stream "fail.png")}))
+    :fail {:name "Failure" :icon (resource-stream "fail.png")}
+    :error  {:name "Error" :icon (resource-stream "fail.png")}))
 
 (def ^:private notifiers
   ((gntp/make-growler "Speclj")
-    :pass (settings :pass) :fail (settings :fail)))
+    :pass (settings :pass)
+    :fail (settings :fail)
+    :error (settings :error)))
 
 (defn growl
   "Trigger notification of the appropriate type"
@@ -41,7 +44,11 @@
     (report-pass [this result])
     (report-pending [this result])
     (report-fail [this result])
-    (report-runs [this results] (growl-message results)))
+    (report-runs [this results] (growl-message results))
+    (report-error [this exception]
+      (growl :error (format "%s: %s"
+                            (.getSimpleName (class exception))
+                            (.getMessage exception)))))
 
 (defn new-growl-reporter []
     (GrowlReporter.))
