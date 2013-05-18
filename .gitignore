@@ -4,3 +4,5 @@ lib
 classes
 Speclj-growl.iml
 .idea
+.lein-repl-history
+target
