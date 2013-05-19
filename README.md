@@ -11,9 +11,11 @@ Go to System Preferences -> Growl -> Network and check the following boxes:
 * Listen for incoming notifications
 * Allow remote application registration (make sure password field is empty)
 
-If you use [leiningen](https://github.com/technomancy/leiningen), add the following to your project.clj:
+If you use [leiningen](https://github.com/technomancy/leiningen), add the following to your project.clj under the :dev profile:
 
-    :dev-dependencies [[speclj-growl "1.0.1"]]
+    :dependencies [[speclj-growl "2.1.0"]]
+
+As of version 2.1.0, speclj 2.7.x is required.
 
 ## Usage
 
