@@ -3,3 +3,5 @@ pom.xml
 /target
 Speclj-growl.iml
 .idea
+.lein-repl-history
+target
